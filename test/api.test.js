@@ -589,4 +589,22 @@ describe("OBL-04..10: NodataNime REST API, Data Integrity, Community, PWA & Secu
     assert.match(clientJs, /id="retryLiveStreamBtn"/);
     assert.match(clientJs, /refresh:\s*true/);
   });
+
+  it("never emits synthetic ep-... IDs for catalog-only series in snapshot detail and never sends users to ylnime.com (v7.4)", async () => {
+    const appJsRes = await fetch(`${baseUrl}/js/app.js`);
+    assert.equal(appJsRes.status, 200);
+    const appJsText = await appJsRes.text();
+    assert.ok(
+      !appJsText.includes("Buka Sumber Episode Ini"),
+      "Unavailable player must not send users to origin site ylnime.com"
+    );
+
+    const res = await fetch(`${baseUrl}/api/anime/detail/bocchi-the-rock-sub-indo`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    const episodes = body.detail?.episodes || body.episodes || [];
+    assert.ok(Array.isArray(episodes), "Detail must include episodes array");
+    const hasFakeEpId = episodes.some((ep) => /^ep-[a-z0-9~-]+--\d+$/i.test(ep.episodeId || ""));
+    assert.equal(hasFakeEpId, false, "Snapshot detail must not emit fake ep-<slug>--<num> IDs");
+  });
 });

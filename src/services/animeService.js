@@ -325,12 +325,23 @@ export class AnimeService {
 
     const detail = seriesSlug ? await this.getDetail(seriesSlug).catch(() => null) : null;
     let resolvedEpisodeId = episodeId ? fromSeriesToken(episodeId) : "";
+    let effectiveEpNum = epNum;
+
+    // Jangan pernah meneruskan ID sintetis `ep-<slug>--<num>` ke scraper/upstream.
+    const syntheticMatch = resolvedEpisodeId.match(/^ep-[a-z0-9~-]+--(\d+)$/i);
+    if (syntheticMatch) {
+      if (effectiveEpNum == null) {
+        effectiveEpNum = Number(syntheticMatch[1]);
+      }
+      resolvedEpisodeId = "";
+    }
+
     if (!resolvedEpisodeId && detail && Array.isArray(detail.episodes) && detail.episodes.length > 0) {
       const matched =
-        epNum != null
-          ? detail.episodes.find((e) => Number(e.number) === epNum)
+        effectiveEpNum != null
+          ? detail.episodes.find((e) => Number(e.number) === effectiveEpNum)
           : detail.episodes[0];
-      if (matched?.episodeId) {
+      if (matched?.episodeId && !/^ep-[a-z0-9~-]+--\d+$/i.test(matched.episodeId)) {
         resolvedEpisodeId = matched.episodeId;
       }
     }
@@ -364,8 +375,8 @@ export class AnimeService {
     try {
       const liveEp = await ylnimeClient.scrapeEpisode({
         seriesSlug,
-        episodeId: resolvedEpisodeId || episodeId,
-        epNumber: epNum,
+        episodeId: resolvedEpisodeId,
+        epNumber: effectiveEpNum,
       });
       const { poster, banner } = buildArtworkFields(liveEp?.animeTitle);
       const payload = {

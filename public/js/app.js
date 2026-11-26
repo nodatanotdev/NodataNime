@@ -3107,13 +3107,6 @@ async function renderWatchView({ series = "", episode = "", ep = "", refresh = f
             <button type="button" id="retryLiveStreamBtn" class="nd-btn nd-btn-primary" style="padding:9px 16px;font-size:0.82rem;">
               ${SVG_ICONS.zap} Muat Ulang Server Live
             </button>
-            ${
-              safeUrl(data.sourceUrl, "")
-                ? `<a href="${esc(safeUrl(data.sourceUrl, "#"))}" target="_blank" rel="noopener noreferrer" class="nd-btn nd-btn-secondary" style="padding:9px 16px;font-size:0.82rem;">
-                    ${SVG_ICONS.external} Buka Sumber Episode Ini
-                  </a>`
-                : ""
-            }
             <button type="button" class="nd-btn nd-btn-telegram" style="padding:9px 16px;font-size:0.82rem;" data-open-admin-contact="stream">
               ${SVG_ICONS.telegram} Laporkan ke Admin
             </button>

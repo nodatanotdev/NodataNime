@@ -201,17 +201,14 @@ export class SnapshotStore {
 
     const generatedEpisodes = Array.from({ length: epCount }, (_, idx) => {
       const epNum = epCount - idx;
-      const epId =
-        epNum === epCount && cardItem.episodeId
-          ? cardItem.episodeId
-          : `ep-${token}--${epNum}`;
+      const epId = epNum === epCount && cardItem.episodeId ? cardItem.episodeId : "";
       return {
         episodeId: epId,
-        token: toEpisodeToken(epId, cardItem.rawSlug),
+        token: epId ? toEpisodeToken(epId, cardItem.rawSlug) : "",
         number: epNum,
         title: isMovie ? `${cardItem.title} (Full Movie)` : `Episode ${epNum}`,
         date: idx === 0 && /ongoing/i.test(cardItem.status) ? "Baru Rilis" : cardItem.year || "2026",
-        hasVerifiedStream: Boolean(this.data.episodeStreams[epId]),
+        hasVerifiedStream: Boolean(epId && this.data.episodeStreams[epId]),
       };
     });
 
